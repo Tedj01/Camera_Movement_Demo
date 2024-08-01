@@ -1,0 +1,308 @@
+bl_info = {
+    "name": "Comprehensive Camera Movement Plugin with Opposites",
+    "blender": (2, 80, 0),
+    "category": "Object",
+}
+
+import bpy
+import math
+
+# Operators with Opposite Directions
+
+class CAMERA_OT_pan(bpy.types.Operator):
+    """Pan Camera"""
+    bl_idname = "camera.pan"
+    bl_label = "Pan Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    angle: bpy.props.FloatProperty(name="Angle", default=0.1)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.rotation_euler[2] -= self.angle
+        else:
+            bpy.context.object.rotation_euler[2] += self.angle
+        return {'FINISHED'}
+
+class CAMERA_OT_tilt(bpy.types.Operator):
+    """Tilt Camera"""
+    bl_idname = "camera.tilt"
+    bl_label = "Tilt Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    angle: bpy.props.FloatProperty(name="Angle", default=0.1)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.rotation_euler[0] -= self.angle
+        else:
+            bpy.context.object.rotation_euler[0] += self.angle
+        return {'FINISHED'}
+
+class CAMERA_OT_dolly(bpy.types.Operator):
+    """Dolly Camera"""
+    bl_idname = "camera.dolly"
+    bl_label = "Dolly Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    distance: bpy.props.FloatProperty(name="Distance", default=1.0)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.location[1] -= self.distance
+        else:
+            bpy.context.object.location[1] += self.distance
+        return {'FINISHED'}
+
+class CAMERA_OT_tracking(bpy.types.Operator):
+    """Tracking Camera"""
+    bl_idname = "camera.tracking"
+    bl_label = "Tracking Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    distance: bpy.props.FloatProperty(name="Distance", default=1.0)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.location[0] -= self.distance
+        else:
+            bpy.context.object.location[0] += self.distance
+        return {'FINISHED'}
+
+class CAMERA_OT_zoom(bpy.types.Operator):
+    """Zoom Camera"""
+    bl_idname = "camera.zoom"
+    bl_label = "Zoom Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    factor: bpy.props.FloatProperty(name="Factor", default=1.1)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.data.lens /= self.factor
+        else:
+            bpy.context.object.data.lens *= self.factor
+        return {'FINISHED'}
+
+class CAMERA_OT_arc(bpy.types.Operator):
+    """Arc Camera"""
+    bl_idname = "camera.arc"
+    bl_label = "Arc Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    radius: bpy.props.FloatProperty(name="Radius", default=5.0)
+    angle: bpy.props.FloatProperty(name="Angle", default=math.pi/4)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        obj = bpy.context.object
+        if self.reverse:
+            self.angle = -self.angle
+        x = obj.location.x + self.radius * math.cos(self.angle)
+        y = obj.location.y + self.radius * math.sin(self.angle)
+        obj.location.x = x
+        obj.location.y = y
+        return {'FINISHED'}
+
+class CAMERA_OT_roll(bpy.types.Operator):
+    """Roll Camera"""
+    bl_idname = "camera.roll"
+    bl_label = "Roll Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    angle: bpy.props.FloatProperty(name="Angle", default=0.1)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.rotation_euler[1] -= self.angle
+        else:
+            bpy.context.object.rotation_euler[1] += self.angle
+        return {'FINISHED'}
+
+class CAMERA_OT_handheld(bpy.types.Operator):
+    """Handheld Camera (Simulated Shake)"""
+    bl_idname = "camera.handheld"
+    bl_label = "Handheld Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    amplitude: bpy.props.FloatProperty(name="Amplitude", default=0.1)
+    frequency: bpy.props.FloatProperty(name="Frequency", default=1.0)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        obj = bpy.context.object
+        frame = context.scene.frame_current
+        if self.reverse:
+            obj.location.x -= self.amplitude * math.sin(self.frequency * frame)
+            obj.location.y -= self.amplitude * math.cos(self.frequency * frame)
+        else:
+            obj.location.x += self.amplitude * math.sin(self.frequency * frame)
+            obj.location.y += self.amplitude * math.cos(self.frequency * frame)
+        return {'FINISHED'}
+
+class CAMERA_OT_steadicam(bpy.types.Operator):
+    """Steadicam Camera (Simulated Smoothness)"""
+    bl_idname = "camera.steadicam"
+    bl_label = "Steadicam Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    smoothness: bpy.props.FloatProperty(name="Smoothness", default=0.5)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        # Simulate smoothness in a more sophisticated manner if needed
+        return {'FINISHED'}
+
+class CAMERA_OT_pedestal(bpy.types.Operator):
+    """Pedestal Camera"""
+    bl_idname = "camera.pedestal"
+    bl_label = "Pedestal Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    distance: bpy.props.FloatProperty(name="Distance", default=1.0)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.location[2] -= self.distance
+        else:
+            bpy.context.object.location[2] += self.distance
+        return {'FINISHED'}
+
+class CAMERA_OT_whip_pan(bpy.types.Operator):
+    """Whip Pan Camera"""
+    bl_idname = "camera.whip_pan"
+    bl_label = "Whip Pan Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    speed: bpy.props.FloatProperty(name="Speed", default=1.0)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.rotation_euler[2] -= self.speed
+        else:
+            bpy.context.object.rotation_euler[2] += self.speed
+        return {'FINISHED'}
+
+class CAMERA_OT_rack_focus(bpy.types.Operator):
+    """Rack Focus Camera"""
+    bl_idname = "camera.rack_focus"
+    bl_label = "Rack Focus Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    focus_distance: bpy.props.FloatProperty(name="Focus Distance", default=10.0)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.data.dof.focus_distance -= self.focus_distance
+        else:
+            bpy.context.object.data.dof.focus_distance += self.focus_distance
+        return {'FINISHED'}
+
+class CAMERA_OT_zoom_dolly(bpy.types.Operator):
+    """Zoom Dolly Camera"""
+    bl_idname = "camera.zoom_dolly"
+    bl_label = "Zoom Dolly Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    distance: bpy.props.FloatProperty(name="Distance", default=1.0)
+    zoom_factor: bpy.props.FloatProperty(name="Zoom Factor", default=1.1)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        obj = bpy.context.object
+        if self.reverse:
+            obj.location[1] -= self.distance
+            obj.data.lens /= self.zoom_factor
+        else:
+            obj.location[1] += self.distance
+            obj.data.lens *= self.zoom_factor
+        return {'FINISHED'}
+
+class CAMERA_OT_aerial(bpy.types.Operator):
+    """Aerial Camera"""
+    bl_idname = "camera.aerial"
+    bl_label = "Aerial Camera"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    height: bpy.props.FloatProperty(name="Height", default=10.0)
+    reverse: bpy.props.BoolProperty(name="Reverse", default=False)
+
+    def execute(self, context):
+        if self.reverse:
+            bpy.context.object.location.z -= self.height
+        else:
+            bpy.context.object.location.z += self.height
+        return {'FINISHED'}
+
+# UI Panel
+
+class VIEW3D_PT_camera_movements(bpy.types.Panel):
+    """Camera Movements Panel"""
+    bl_label = "Camera Movements"
+    bl_idname = "VIEW3D_PT_camera_movements"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Camera Moves'
+
+    def draw(self, context):
+        layout = self.layout
+        # Define the operators with reverse options
+        layout.operator("camera.pan", text="Pan Camera")
+        layout.operator("camera.tilt", text="Tilt Camera")
+        layout.operator("camera.dolly", text="Dolly Camera")
+        layout.operator("camera.tracking", text="Tracking Camera")
+        layout.operator("camera.zoom", text="Zoom Camera")
+        layout.operator("camera.arc", text="Arc Camera")
+        layout.operator("camera.roll", text="Roll Camera")
+        layout.operator("camera.handheld", text="Handheld Camera")
+        layout.operator("camera.steadicam", text="Steadicam Camera")
+        layout.operator("camera.pedestal", text="Pedestal Camera")
+        layout.operator("camera.whip_pan", text="Whip Pan Camera")
+        layout.operator("camera.rack_focus", text="Rack Focus Camera")
+        layout.operator("camera.zoom_dolly", text="Zoom Dolly Camera")
+        layout.operator("camera.aerial", text="Aerial Camera")
+
+        # Add reverse options
+        layout.prop(context.scene, "reverse_camera_movement", text="Reverse Movements")
+
+# Register and Unregister
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    bpy.types.Scene.reverse_camera_movement = bpy.props.BoolProperty(name="Reverse Camera Movements", default=False)
+
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    del bpy.types.Scene.reverse_camera_movement
+
+classes = (
+    CAMERA_OT_pan,
+    CAMERA_OT_tilt,
+    CAMERA_OT_dolly,
+    CAMERA_OT_tracking,
+    CAMERA_OT_zoom,
+    CAMERA_OT_arc,
+    CAMERA_OT_roll,
+    CAMERA_OT_handheld,
+    CAMERA_OT_steadicam,
+    CAMERA_OT_pedestal,
+    CAMERA_OT_whip_pan,
+    CAMERA_OT_rack_focus,
+    CAMERA_OT_zoom_dolly,
+    CAMERA_OT_aerial,
+    VIEW3D_PT_camera_movements,
+)
+
+if __name__ == "__main__":
+    register()
